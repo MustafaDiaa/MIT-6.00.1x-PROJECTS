@@ -1,0 +1,105 @@
+def buildCoder(shift):
+    """
+    Returns a dict that can apply a Caesar cipher to a letter.
+    The cipher is defined by the shift value. Ignores non-letter characters
+    like punctuation, numbers, and spaces.
+
+    shift: 0 <= int < 26
+    returns: dict
+    """
+    low_case = ''
+    upper_case = ''
+    for i in range(0, 26):
+        low_case += chr(i+97)
+    for i in range(0, 26):
+        upper_case += chr(i+65)
+
+    dic = {}
+    count = 0
+    count2 = 0
+    
+    for i in range(0, 26):
+        dic[upper_case[i]] = chr(ord(upper_case[i])+shift)
+        if ord(upper_case[i])+shift > 90:
+            dic[upper_case[i]] = upper_case[count]
+            count += 1
+    for i in range(0, 26):
+        dic[low_case[i]] = chr(ord(low_case[i])+shift)
+        if ord(low_case[i])+shift > 122:
+            dic[low_case[i]] = low_case[count2]
+            count2 += 1
+    return dic
+
+
+def applyCoder(text, coder):
+    """
+    Applies the coder to the text. Returns the encoded text.
+
+    text: string
+    coder: dict with mappings of characters to shifted characters
+    returns: text after mapping coder chars to original text
+    """
+    ### TODO
+    lis = []
+    ans = ''
+    for i in range(len(text)):
+        lis += text[i]
+    dic = coder
+    for i in range(len(text)):
+        if (ord(lis[i]) >=65 and ord(lis[i])<= 90) or ((ord(lis[i]) >=97 and ord(lis[i])<= 122)):
+            lis[i] = dic.get(lis[i])
+    for i in range(len(lis)):
+        ans += lis[i]
+    return ans
+
+
+def applyShift(text, shift):
+    """
+    Given a text, returns a new text Caesar shifted by the given shift
+    offset. Lower case letters should remain lower case, upper case
+    letters should remain upper case, and all other punctuation should
+    stay as it is.
+
+    text: string to apply the shift to
+    shift: amount to shift the text (0 <= int < 26)
+    returns: text after being shifted by specified amount.
+    """
+    return applyCoder(text, buildCoder(shift))
+
+
+def findBestShift(wordList, text):
+    """
+    Finds a shift key that can decrypt the encoded text.
+
+    text: string
+    returns: 0 <= int < 26
+    """
+    maxWords = 0
+    newMaxWords = 0
+    ans = 0
+    bestShift = 0
+
+    for shift in range(0, 26):
+        word = applyShift(text, shift)
+        word = word.split()
+        for x in range(len(word)):
+            if isWord(wordList, word[x]) == True:
+                newMaxWords += 1
+        if newMaxWords > maxWords:
+            maxWords = newMaxWords
+            bestShift = shift
+    return bestShift
+
+
+def decryptStory():
+    """
+    Using the methods you created in this problem set,
+    decrypt the story given by the function getStoryString().
+    Once you decrypt the message, be sure to include as a comment
+    your decryption of the story.
+
+    returns: string - story in plain text
+    """
+    wordList = loadWords()
+    shift = findBestShift(wordList, getStoryString())
+    return applyShift(getStoryString(), shift)
